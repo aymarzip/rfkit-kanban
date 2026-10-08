@@ -3,7 +3,9 @@
 > **Дисципліна:** Програмне забезпечення ПК (Розділ І. Організація роботи та управління проєктами)  
 > **Заклад освіти:** ВСП «Рівненський фаховий коледж інформаційних технологій» (РФКІТ)  
 > **Тема:** Організація навчального процесу та візуалізація завдань за допомогою Kanban-дошки (Trello, Notion, Web Kanban)  
-> **Виконавець:** Студент Aymar (GitHub: [`aymarzip`](https://github.com/aymarzip))
+> **Виконавець:** Студент Aymar (GitHub: [`aymarzip`](https://github.com/aymarzip))  
+> **Живе демо (GitHub Pages):** [https://aymarzip.github.io/rfkit-kanban/](https://aymarzip.github.io/rfkit-kanban/)  
+> **Репозиторій проєкту:** [https://github.com/aymarzip/rfkit-kanban](https://github.com/aymarzip/rfkit-kanban)  
 
 ---
 
