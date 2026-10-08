@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>РФКІТ — Kanban-дошка навчальних робіт</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header with College Branding -->
+  <header class="app-header">
+    <div class="header-left">
+      <div class="college-logo">
+        <span class="logo-icon">📋</span>
+        <div class="logo-text">
+          <h1 id="board-title" class="board-title">РФКІТ</h1>
+          <span class="board-subtitle">Канбан-дошка навчальних завдань • Рівненський фаховий коледж інформаційних технологій</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Пошук завдань або дисциплін..." aria-label="Пошук">
+        <span class="search-icon">🔍</span>
+      </div>
+      
+      <select id="filterDiscipline" class="filter-select" aria-label="Фільтр за дисципліною">
+        <option value="all">Усі дисципліни</option>
+        <option value="Програмне забезпечення ПК">Програмне забезпечення ПК</option>
+        <option value="Основи програмування">Основи програмування</option>
+        <option value="Інформатика і комп'ютерна техніка">Інформатика і комп'ютерна техніка</option>
+        <option value="Вища математика">Вища математика</option>
+      </select>
+      
+      <button id="addCardBtn" class="btn btn-primary">
+        <span class="btn-icon">➕</span> Додати картку
+      </button>
+      
+      <button id="runTestBtn" class="btn btn-secondary" title="Запустити автоматизований тест перекидання карток">
+        <span class="btn-icon">⚡</span> Протестувати перекидання
+      </button>
+
+      <button id="resetBoardBtn" class="btn btn-ghost" title="Скинути до початкового стану РФКІТ">
+        <span class="btn-icon">🔄</span> Скинути
+      </button>
+      
+      <button id="exportJsonBtn" class="btn btn-ghost" title="Експортувати у JSON">
+        <span class="btn-icon">💾</span> JSON
+      </button>
+    </div>
+  </header>
+
+  <!-- Live Test Notification Banner -->
+  <div id="testBanner" class="test-banner hidden">
+    <div class="test-banner-content">
+      <span class="test-spinner">⏳</span>
+      <span id="testBannerText">Виконується тестування перекидання карток...</span>
+    </div>
+    <div class="test-progress-bar">
+      <div id="testProgressFill" class="test-progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Board Container -->
+  <main class="board-wrapper">
+    <div class="kanban-board" id="kanbanBoard">
+      
+      <!-- Column: To Do -->
+      <section class="kanban-column" id="col-todo" data-column-id="todo">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="column-indicator todo-indicator"></span>
+            <h2 class="column-title">To Do</h2>
+            <span class="card-count" id="count-todo">0</span>
+          </div>
+          <button class="col-add-btn" data-column="todo" title="Швидко додати в To Do">+</button>
+        </div>
+        <div class="column-cards-container" id="cards-todo" data-column-id="todo">
+          <!-- Cards inserted dynamically -->
+        </div>
+      </section>
+
+      <!-- Column: In Progress -->
+      <section class="kanban-column" id="col-in-progress" data-column-id="in-progress">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="column-indicator progress-indicator"></span>
+            <h2 class="column-title">In Progress</h2>
+            <span class="card-count" id="count-in-progress">0</span>
+          </div>
+          <button class="col-add-btn" data-column="in-progress" title="Швидко додати в In Progress">+</button>
+        </div>
+        <div class="column-cards-container" id="cards-in-progress" data-column-id="in-progress">
+          <!-- Cards inserted dynamically -->
+        </div>
+      </section>
+
+      <!-- Column: Done -->
+      <section class="kanban-column" id="col-done" data-column-id="done">
+        <div class="column-header">
+          <div class="column-title-group">
+            <span class="column-indicator done-indicator"></span>
+            <h2 class="column-title">Done</h2>
+            <span class="card-count" id="count-done">0</span>
+          </div>
+          <button class="col-add-btn" data-column="done" title="Швидко додати в Done">+</button>
+        </div>
+        <div class="column-cards-container" id="cards-done" data-column-id="done">
+          <!-- Cards inserted dynamically -->
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Live Test Results Drawer / Modal -->
+  <aside id="testLogDrawer" class="test-drawer collapsed">
+    <div class="drawer-header" id="drawerToggle">
+      <div class="drawer-title">
+        <span>📊 Журнал тестування перекидання карток</span>
+        <span id="testStatusBadge" class="status-badge ready">Готово до запуску</span>
+      </div>
+      <button class="drawer-toggle-btn" id="drawerCollapseBtn">▲</button>
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-actions">
+        <button id="runInteractiveTestBtn" class="btn btn-sm btn-primary">Почати симуляцію перекидання</button>
+        <button id="clearLogBtn" class="btn btn-sm btn-ghost">Очистити журнал</button>
+      </div>
+      <div id="testLogContainer" class="test-log-container">
+        <div class="log-entry info">Натисніть «Почати симуляцію перекидання» або «Протестувати перекидання» у шапці, щоб перевірити транзит завдань: To Do ➔ In Progress ➔ Done.</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Card Create / Edit Modal -->
+  <div id="cardModal" class="modal-overlay hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modalTitle">Створити навчальну картку</h3>
+        <button class="modal-close" id="modalCloseBtn">&times;</button>
+      </div>
+      <form id="cardForm" class="modal-form">
+        <input type="hidden" id="cardId">
+        
+        <div class="form-group">
+          <label for="cardTitleInput">Назва завдання (лабораторна / практична) *</label>
+          <input type="text" id="cardTitleInput" required placeholder="Наприклад: Практична робота № 3: Оформлення README">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="cardDisciplineInput">Дисципліна *</label>
+            <select id="cardDisciplineInput" required>
+              <option value="Програмне забезпечення ПК">Програмне забезпечення ПК</option>
+              <option value="Основи програмування">Основи програмування</option>
+              <option value="Інформатика і комп'ютерна техніка">Інформатика і комп'ютерна техніка</option>
+              <option value="Вища математика">Вища математика</option>
+              <option value="Комп'ютерні мережі">Комп'ютерні мережі</option>
+              <option value="Бази даних">Бази даних</option>
+            </select>
+          </div>
+
+          <div class="form-group half">
+            <label for="cardColumnInput">Колонка *</label>
+            <select id="cardColumnInput" required>
+              <option value="todo">To Do</option>
+              <option value="in-progress">In Progress</option>
+              <option value="done">Done</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half">
+            <label for="cardDeadlineInput">Дедлайн *</label>
+            <input type="date" id="cardDeadlineInput" required>
+          </div>
+
+          <div class="form-group half">
+            <label for="cardPriorityInput">Пріоритет</label>
+            <select id="cardPriorityInput">
+              <option value="high">Високий (High)</option>
+              <option value="medium" selected>Середній (Medium)</option>
+              <option value="low">Низький (Low)</option>
+              <option value="urgent">Терміновий (Urgent)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="cardDescriptionInput">Опис завдання та вимоги *</label>
+          <textarea id="cardDescriptionInput" rows="4" required placeholder="Детальний опис лабораторної або практичної роботи, пункти ТЗ, критерії перевірки..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" id="modalCancelBtn">Скасувати</button>
+          <button type="submit" class="btn btn-primary" id="modalSubmitBtn">Зберегти картку</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Card Details View Modal -->
+  <div id="detailsModal" class="modal-overlay hidden">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="details-discipline-badge" id="detailsDiscipline">Дисципліна</div>
+        <button class="modal-close" id="detailsCloseBtn">&times;</button>
+      </div>
+      <div class="details-content">
+        <h2 id="detailsTitle" class="details-title">Назва</h2>
+        <div class="details-meta-bar">
+          <div class="meta-item">
+            <span class="meta-label">Статус:</span>
+            <span id="detailsStatus" class="meta-val status-pill">To Do</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Дедлайн:</span>
+            <span id="detailsDeadline" class="meta-val">15.10.2026</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">Пріоритет:</span>
+            <span id="detailsPriority" class="meta-val priority-pill">High</span>
+          </div>
+        </div>
+
+        <div class="details-section">
+          <h4>Опис завдання:</h4>
+          <p id="detailsDescription" class="details-desc-text"></p>
+        </div>
+
+        <div class="details-move-section">
+          <h4>Швидке переміщення картки:</h4>
+          <div class="quick-move-btns">
+            <button class="btn btn-sm btn-outline move-btn" data-target="todo">У To Do</button>
+            <button class="btn btn-sm btn-outline move-btn" data-target="in-progress">У In Progress</button>
+            <button class="btn btn-sm btn-outline move-btn" data-target="done">У Done</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger btn-sm" id="detailsDeleteBtn">Видалити картку</button>
+        <button type="button" class="btn btn-secondary btn-sm" id="detailsEditBtn">Редагувати</button>
+        <button type="button" class="btn btn-primary btn-sm" id="detailsOkBtn">Закрити</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast hidden">
+    <span id="toastMessage">Повідомлення</span>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
